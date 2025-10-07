@@ -12,6 +12,7 @@ namespace hekky {
 		struct OscMessage : OscPacket {
 		public:
 			OscMessage(const std::string& address);
+			OscMessage(char* buffer, int buffer_length);
 			~OscMessage();
 
 			// Explicit Push functions
@@ -77,6 +78,8 @@ namespace hekky {
 
 		private:
 			char* GetBytes(int& size);
+			std::string get_type_list(char* buffer, int buffer_length);
+			std::vector<char> get_data(char* buffer, int buffer_length);
 
 		private:
 			bool m_readonly;

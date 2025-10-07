@@ -19,6 +19,22 @@
 
 #endif
 
+#if defined(HEKKYOSC_LINUX) || defined(HEKKYOSC_MAC)
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <errno.h>
+
+#endif
+
 namespace hekky {
 	namespace osc {
 
@@ -62,6 +78,11 @@ namespace hekky {
 			void Send(OscPacket& message);
 
 			/// <summary>
+			/// Receives an OSC Packet over this UDP socket.
+			/// </summary>
+			hekky::osc::OscMessage Receive();
+
+			/// <summary>
 			/// Returns whether the server is alive or not
 			/// </summary>
 			const bool IsAlive();
@@ -85,7 +106,20 @@ namespace hekky {
 
 			sockaddr_in m_destinationAddress;
 			sockaddr_in m_localAddress;
+#endif
 
+#if defined(HEKKYOSC_LINUX) || defined(HEKKYOSC_MAC) 
+			int m_nativeSocket;
+
+			sockaddr_in m_destinationAddress;
+			sockaddr_in m_localAddress;
+#endif
+			
+#if defined(HEKKYOSC_STM32)
+			int m_nativeSocket;
+
+			int m_destinationAddress;
+			int m_localAddress;
 #endif
 		};
 	}

@@ -11,8 +11,11 @@
 	#define HEKKYOSC_ANDROID
 	#error "Android is not supported!"
 #elif defined(__linux__)
-	#define HEKKYOSC_LINUX
-	#error "Linux is not supported!"
+#define HEKKYOSC_LINUX
+#elif defined(__APPLE__)
+#define HEKKYOSC_MAC
+#elif defined(__STM32F7xx_HAL_H)
+#define HEKKYOSC_STM32
 #else
 	// Sorry, we do not support whatever you're trying to use!
 	#error "Unknown Platform!"

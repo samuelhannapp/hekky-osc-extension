@@ -12,6 +12,17 @@ namespace hekky {
 			m_data.reserve(constants::OSC_MINIMUM_PACKET_BYTES);
 		}
 
+		OscMessage::OscMessage(char* buffer, int buffer_length)
+		{
+			m_address = std::string(buffer);
+			HEKKYOSC_ASSERT(m_address.length() > 1, "The address is invalid!");
+			HEKKYOSC_ASSERT(m_address.at(0) == '/', "The address is invalid! It should start with a '/'!");
+			m_type = get_type_list(buffer, buffer_length);
+			m_data = get_data(buffer, buffer_length);
+			m_readonly = false;
+
+		}
+
 		OscMessage::~OscMessage() {
 			m_data.clear();
 		}
@@ -29,7 +40,8 @@ namespace hekky {
 
 			if (isinf(data)) {
 				m_type += "I";
-			} else {
+			}
+			else {
 				union {
 					float f;
 					char c[4];
@@ -45,12 +57,13 @@ namespace hekky {
 			return *this;
 		}
 
-		OscMessage OscMessage::PushFloat64 (double data) {
+		OscMessage OscMessage::PushFloat64(double data) {
 			HEKKYOSC_ASSERT(m_readonly == false, "Cannot write to a message packet once sent to the network! Construct a new message instead.");
 
 			if (isinf(data)) {
 				m_type += "I";
-			} else {
+			}
+			else {
 				union {
 					double d;
 					char c[8];
@@ -257,11 +270,32 @@ namespace hekky {
 
 			// Add header to start of data block
 			m_data.insert(m_data.begin(), headerData.begin(), headerData.end());
-			
+
 			// Lock this packet
 			m_readonly = true;
 			size = static_cast<int>(m_data.size());
 			return m_data.data();
+		}
+
+		std::string OscMessage::get_type_list(char* buffer, int buffer_length){
+			int ctr = 0;
+			std::string ret;
+			while (ctr++ < buffer_length) {
+				if (*buffer++ == ',')
+					break;
+			}
+			while (ctr++ < buffer_length) {
+				if (*buffer != '\0')
+					ret.push_back(*buffer++);
+				else
+					break;
+			}
+			return ret;
+		}
+
+		std::vector<char> get_data(char* buffer, int buffer_length){
+			std::vector<char> out;
+			return out;
 		}
 	}
 }
