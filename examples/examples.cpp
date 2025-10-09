@@ -2,8 +2,11 @@
 
 #include "hekky-osc.hpp"
 
+#define ARDOUR_TEST
+
 int main()
 {
+#ifndef ARDOUR_TEST
     // Open a UDP socket, pointing to localhost on port 9000
     auto udpSender = hekky::osc::UdpSender("127.0.0.1", 9000, 9001);
 
@@ -39,4 +42,19 @@ int main()
     // udpSender.Close();
 
     std::cout << "Done!\n";
+#endif
+
+#ifdef ARDOUR_TEST
+    auto udpSender = hekky::osc::UdpSender("127.0.0.1", 3819, 8);
+    hekky::osc::OscMessage send_message = hekky::osc::OscMessage("/set_surface/feedback");
+    send_message.PushInt32(0b11);
+    udpSender.Send(send_message);
+    
+    while (1) {
+        hekky::osc::OscMessage rec_message = udpSender.Receive();
+    }
+
+    std::cout << "Done!\n";
+
+#endif
 }

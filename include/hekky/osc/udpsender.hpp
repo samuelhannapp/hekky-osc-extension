@@ -35,6 +35,21 @@
 
 #endif
 
+#if defined HEKKYOSC_STM32
+#include "lwip/pbuf.h"
+#include "lwip/udp.h"
+#include "lwip/tcp.h"
+
+#include "stdio.h"
+#include "string.h"
+
+#include "udpClientRAW.h"
+#include "udpsender.hpp"
+
+#include "enums.hpp"
+#endif
+
+
 namespace hekky {
 	namespace osc {
 
@@ -115,11 +130,14 @@ namespace hekky {
 			sockaddr_in m_localAddress;
 #endif
 			
-#if defined(HEKKYOSC_STM32)
-			int m_nativeSocket;
+#if defined HEKKYOSC_STM32
+			struct udp_pcb* m_nativeSocket;
 
 			int m_destinationAddress;
 			int m_localAddress;
+			//void udp_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port);
+			char buffer[1024];
+			int counter = 0;
 #endif
 		};
 	}

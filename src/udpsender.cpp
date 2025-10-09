@@ -129,6 +129,29 @@ namespace hekky {
             }
             m_isAlive = true;
 #endif
+#ifdef HEKKYOSC_STM32
+            err_t err;
+
+            /* 1. Create a new UDP control block  */
+            m_nativeSocket = udp_new();
+
+            /* Bind the block to module's IP and port */
+            ip_addr_t myIPaddr;
+            IP_ADDR4(&myIPaddr, 192, 168, 10, 10);
+            udp_bind(m_nativeSocket, &myIPaddr, portIn);
+
+
+            /* configure destination IP address and port */
+            ip_addr_t DestIPaddr;
+            IP_ADDR4(&DestIPaddr, 192, 168, 10, 226);
+            err = udp_connect(m_nativeSocket, &DestIPaddr, portOut);
+
+            if (err == ERR_OK)
+            {
+                /*Set a receive callback for the upcb */
+                udp_recv(m_nativeSocket, udp_receive_callback, NULL);
+            }
+#endif
         }
 
         UdpSender::~UdpSender() {
@@ -179,10 +202,14 @@ namespace hekky {
             // Send data over the socket
             sendto(m_nativeSocket, data, size, 0, (struct sockaddr*)&m_destinationAddress, sizeof(m_destinationAddress)); //thats exactly the same, we should get rid of that one
 #endif
+
 #ifdef HEKKYOSC_STM32
-            udpClient_send(data, size);
+            if (size < 1)
+                return;
+            sendto(m_nativeSocket, data, size, 0, &m_destinationAddress, sizeof(m_destinationAddress));
 #endif
         }
+
 
         void UdpSender::Send(OscPacket& packet) {
 #ifdef HEKKYOSC_WINDOWS
@@ -207,24 +234,31 @@ namespace hekky {
 #endif
         }
         hekky::osc::OscMessage  UdpSender::Receive() {
-#ifdef HEKKYOSC_WINDOWS
             char buffer[1024];
             int buffer_length = 1024;
-            int res = 0;
+            
+#ifdef HEKKYOSC_WINDOWS
             struct sockaddr_in sender_address;
             int sender_address_size = sizeof(sender_address);
-            res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, (SOCKADDR*)&sender_address, &sender_address_size);
+            int res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, (SOCKADDR*)&sender_address, &sender_address_size);
+            auto message = hekky::osc::OscMessage(buffer, buffer_length);
+            return message;
+
+#endif
+#if defined(HEKKYOSC_LINUX) || defined(HEKKYOSC_MAC)
+            struct sockaddr_in sender_address;
+            int sender_address_size = sizeof(sender_address);
+            int res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, (struct sockaddr*)&sender_address, (socklen_t*)&sender_address_size);
             auto message = hekky::osc::OscMessage(buffer, buffer_length);
             return message;
 #endif
-#if defined(HEKKYOSC_LINUX) || defined(HEKKYOSC_MAC)
-            char buffer[1024];
-            int buffer_length = 1024;
-            int res = 0;
-            struct sockaddr_in sender_address;
+#if defined HEKKYOSC_STM32
+            ip_addr_t sender_address;
             int sender_address_size = sizeof(sender_address);
-            res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, (struct sockaddr*)&sender_address, (socklen_t*)&sender_address_size);
-            auto message = hekky::osc::OscMessage(buffer, buffer_length);
+            int res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, &sender_address, &sender_address_size);
+            hekky::osc::OscMessage message("/nothing");
+            if (res)
+                message = hekky::osc::OscMessage(buffer, buffer_length);
             return message;
 #endif
 

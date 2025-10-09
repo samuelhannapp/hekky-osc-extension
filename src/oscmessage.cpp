@@ -293,7 +293,7 @@ namespace hekky {
 			return ret;
 		}
 
-		std::vector<char> get_data(char* buffer, int buffer_length){
+		std::vector<char> OscMessage::get_data(char* buffer, int buffer_length){
 			std::vector<char> out;
 			return out;
 		}
