@@ -1,9 +1,9 @@
 #pragma once
 
-#include "hekky/osc/platform.hpp"
-#include "hekky/osc/asserts.hpp"
-#include "hekky/osc/oscpacket.hpp"
-#include "hekky/osc/oscmessage.hpp"
+#include "platform.hpp"
+#include "asserts.hpp"
+#include "oscpacket.hpp"
+#include "oscmessage.hpp"
 
 #include <string>
 
@@ -40,11 +40,11 @@
 #include "lwip/udp.h"
 #include "lwip/tcp.h"
 
-#include "stdio.h"
+//#include "stdio.h"
 #include "string.h"
 
-#include "udpClientRAW.h"
-#include "udpsender.hpp"
+#include "stm32_sock.h"
+//#include "udpsender.hpp"
 
 #include "enums.hpp"
 #endif
@@ -133,10 +133,9 @@ namespace hekky {
 #if defined HEKKYOSC_STM32
 			struct udp_pcb* m_nativeSocket;
 
-			int m_destinationAddress;
-			int m_localAddress;
+			ip_addr_t m_destinationAddress;
+			ip_addr_t m_localAddress;
 			//void udp_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port);
-			char buffer[1024];
 			int counter = 0;
 #endif
 		};

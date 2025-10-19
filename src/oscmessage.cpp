@@ -1,6 +1,7 @@
-#include "hekky/osc/oscmessage.hpp"
-#include "hekky/osc/utils.hpp"
+#include "oscmessage.hpp"
+#include "utils.hpp"
 #include <math.h>
+#include <string.h>
 
 namespace hekky {
 	namespace osc {
@@ -295,7 +296,111 @@ namespace hekky {
 
 		std::vector<char> OscMessage::get_data(char* buffer, int buffer_length){
 			std::vector<char> out;
+			for(int i = 0; i < buffer_length; i++)
+				out.push_back(*(buffer + i));
 			return out;
 		}
+
+		int OscMessage::get_data_start_point(){
+				std::string debug_string;
+				bool debug_active = false;
+				int c = 0;
+				for(c = 0; c < this->m_data.size(); c++)
+					debug_string.push_back(this->m_data.at(c));
+				if(c != 0)
+					debug_active = true;
+
+				int i = 0;
+				while (this->m_data[i] != ',')
+					i++;
+				while (this->m_data[i] != '\0')
+					i++;
+				//we found the closing '\0' after the type string, now lets go one further...
+				i++;
+				while ((i % 4) != 0)
+					i++;
+				return i;
+		}
+
+		int OscMessage::get_string_length(int where){
+			while(this->m_data.at(where) != '\0')
+				where++;
+			//we found the closing '\0', now let's go one further
+			where++;
+			//now make it even to 4 bytes
+			while (where % sizeof(int) != 0)
+				where++;
+			return where;
+		}
+
+		int OscMessage::get_argument_start_point(int where){
+
+			int start_point = this->get_data_start_point();
+			for(int i = 0; i < where; i++)
+				switch(this->m_type.at(i)){
+				case 'i':
+					start_point += 4;
+					break;
+				case 'f':
+					start_point += 4;
+					break;
+				case 's':
+					start_point += this->get_string_length(start_point);
+					break;
+				case 'd':
+					start_point += 8;
+					break;
+				}
+			return start_point;
+		}
+
+		float OscMessage::get_float(int argument_nr){
+			int argument_start_point = this->get_argument_start_point(argument_nr);
+
+			unsigned char byte_array[4];
+			for (int i = 0; i < 4; i++)
+			{
+				byte_array[4 - (i + 1)] = this->m_data[argument_start_point + i];
+			}
+
+			float ret = 0;
+			memcpy(&ret, byte_array, sizeof(float));
+			return ret;
+		}
+
+		uint8_t OscMessage::get_int(int argument_nr)
+		{
+			int argument_start_point = this->get_argument_start_point(argument_nr);
+			uint8_t ret = 0;
+
+			for (int i = 0; i < 4; i++) {
+				ret |= ((this->m_data[argument_start_point++]) << (24 - (i * 8)));
+			}
+
+			return ret;
+		}
+
+
+		double OscMessage::get_double(int argument_nr){
+			int argument_start_point = this->get_argument_start_point(argument_nr);
+
+			unsigned char byte_array[8];
+			for (int i = 0; i < 8; i++)
+			{
+				byte_array[8 - (i + 1)] = this->m_data[argument_start_point + i];
+			}
+
+			double val = 0;
+			memcpy(&val, byte_array, sizeof(double));
+			return val;
+		}
+			std::string OscMessage::get_string(int argument_nr){
+				int argument_start_point = this->get_argument_start_point(argument_nr);
+
+				std::string ret;
+				while (this->m_data[argument_start_point] != '\0')
+					ret.push_back(this->m_data[argument_start_point++]);
+				return ret;
+			}
 	}
 }

@@ -1,4 +1,5 @@
-#include "hekky/osc/utils.hpp"
+#include "utils.hpp"
+#include <cstdint>
 
 namespace hekky {
 	namespace osc {

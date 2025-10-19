@@ -1,5 +1,6 @@
 #include "hekky-osc.hpp"
 
+
 namespace hekky {
     namespace osc {
         uint64_t UdpSender::m_openSockets = 0;
@@ -256,9 +257,12 @@ namespace hekky {
             ip_addr_t sender_address;
             int sender_address_size = sizeof(sender_address);
             int res = recvfrom(m_nativeSocket, buffer, buffer_length, 0, &sender_address, &sender_address_size);
-            hekky::osc::OscMessage message("/nothing");
-            if (res)
+            hekky::osc::OscMessage message("nothing");
+            int debug = 0;
+            if (res){
                 message = hekky::osc::OscMessage(buffer, buffer_length);
+				debug = 1;
+            }
             return message;
 #endif
 

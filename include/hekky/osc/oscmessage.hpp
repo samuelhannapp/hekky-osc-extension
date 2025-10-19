@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iostream>
+//#include <iostream>
 #include <string>
 #include <vector>
 
-#include "hekky/osc/asserts.hpp"
-#include "hekky/osc/oscpacket.hpp"
+#include "asserts.hpp"
+#include "oscpacket.hpp"
 
 namespace hekky {
 	namespace osc {
@@ -75,11 +75,27 @@ namespace hekky {
 			inline const std::string& GetAddress() const {
 				return m_address;
 			}
+			inline const std::string& GetTypeList() const{
+				return m_type;
+			}
+			inline const std::vector<char>& GetData() const{
+				return m_data;
+			}
+
+
+			uint8_t get_int(int where);
+			float get_float(int where);
+			double get_double(int where);
+			std::string get_string(int where);
 
 		private:
 			char* GetBytes(int& size);
 			std::string get_type_list(char* buffer, int buffer_length);
 			std::vector<char> get_data(char* buffer, int buffer_length);
+
+			int get_data_start_point();
+			int get_argument_start_point(int where);
+			int get_string_length(int where);
 
 		private:
 			bool m_readonly;
