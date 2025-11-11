@@ -87,15 +87,18 @@ namespace hekky {
 			float get_float(int where);
 			double get_double(int where);
 			std::string get_string(int where);
+			int get_type_list_size(){return this->m_type.size();}
+			std::string get_type_list(){return this->m_type;}
 
 		private:
 			char* GetBytes(int& size);
-			std::string get_type_list(char* buffer, int buffer_length);
 			std::vector<char> get_data(char* buffer, int buffer_length);
+			std::string get_type_list(char* buffer, int buffer_length);
 
 			int get_data_start_point();
 			int get_argument_start_point(int where);
 			int get_string_length(int where);
+
 
 		private:
 			bool m_readonly;

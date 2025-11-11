@@ -1,5 +1,7 @@
 #include "hekky-osc.hpp"
 
+#include "midi_application.h"
+#include "ip_config.h"
 
 namespace hekky {
     namespace osc {
@@ -138,7 +140,7 @@ namespace hekky {
 
             /* Bind the block to module's IP and port */
             ip_addr_t myIPaddr;
-            IP_ADDR4(&myIPaddr, 192, 168, 10, 10);
+            IP_ADDR4(&myIPaddr, 192, 168, 10, ip_nr_global);
             udp_bind(m_nativeSocket, &myIPaddr, portIn);
 
 

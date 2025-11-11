@@ -322,21 +322,22 @@ namespace hekky {
 				return i;
 		}
 
-		int OscMessage::get_string_length(int where){
-			while(this->m_data.at(where) != '\0')
-				where++;
+		int OscMessage::get_string_length(int start_point){
+			size_t size = this->m_data.size();
+			while(this->m_data.at(start_point) != '\0')
+				start_point++;
 			//we found the closing '\0', now let's go one further
-			where++;
+			start_point++;
 			//now make it even to 4 bytes
-			while (where % sizeof(int) != 0)
-				where++;
-			return where;
+			while (start_point % sizeof(int) != 0)
+				start_point++;
+			return start_point;
 		}
 
-		int OscMessage::get_argument_start_point(int where){
+		int OscMessage::get_argument_start_point(int argument_nr){
 
 			int start_point = this->get_data_start_point();
-			for(int i = 0; i < where; i++)
+			for(int i = 0; i < argument_nr; i++)
 				switch(this->m_type.at(i)){
 				case 'i':
 					start_point += 4;
@@ -345,7 +346,7 @@ namespace hekky {
 					start_point += 4;
 					break;
 				case 's':
-					start_point += this->get_string_length(start_point);
+					start_point = this->get_string_length(start_point);
 					break;
 				case 'd':
 					start_point += 8;
